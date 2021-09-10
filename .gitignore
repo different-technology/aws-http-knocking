@@ -1,0 +1,11 @@
+/.idea
+/lambda/Firewall/build
+
+*.js
+*.js.map
+node_modules
+
+/infrastructure/.terraform
+/infrastructure/terraform.tfvars
+/infrastructure/terraform.tfstate.backup
+/infrastructure/.terraform.tfstate.lock.info
