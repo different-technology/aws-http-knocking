@@ -1,3 +1,12 @@
+
+
+
+####################################
+### This file is just an example ###
+####################################
+
+
+
 locals {
   aws_account_id          = "12345"
   region                  = "eu-central-1"
@@ -14,6 +23,7 @@ module "api_gateway_open_firewall" {
   region                          = local.region
   api_domain_name                 = "api.domain.com"
   base_path                       = "my-firewall"
+  domain_zone_id                  = "12345"
   open_firewall_lambda_invoke_arn = module.firewall_open.lambda_invoke_arn
 }
 
