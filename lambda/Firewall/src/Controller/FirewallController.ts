@@ -1,36 +1,34 @@
-import {EC2} from "aws-sdk";
-import {DescribeSecurityGroupsResult, IpPermission, SecurityGroup} from "aws-sdk/clients/ec2";
-
-const AWS = require('aws-sdk');
-AWS.config.update({region:'eu-central-1'});
+import {EC2Client, AuthorizeSecurityGroupIngressCommand, DescribeSecurityGroupsCommand, DescribeSecurityGroupsResult, RevokeSecurityGroupIngressCommand, IpPermission, SecurityGroup} from "@aws-sdk/client-ec2";
 
 export class FirewallController {
-  private readonly ec2 = new AWS.EC2();
+  private readonly ec2 = new EC2Client({ region: "eu-central-1" });
+  private readonly descriptionPrefix = "Auto generated from Lambda at ";
 
   async openFirewall(securityGroupId: string, ip: string, port: number) {
     console.info('Start "openFirewall" method for ip "' + ip + '"');
     let message = '';
 
     try {
-      await this.ec2.authorizeSecurityGroupIngress({
-        'GroupId': securityGroupId,
-        'IpPermissions': [
+      const command = new AuthorizeSecurityGroupIngressCommand({
+        GroupId: securityGroupId,
+        IpPermissions: [
           {
-            'FromPort': port,
-            'ToPort': port,
-            'IpProtocol': 'tcp',
-            'IpRanges': [
+            FromPort: port,
+            ToPort: port,
+            IpProtocol: 'tcp',
+            IpRanges: [
               {
-                'CidrIp': ip + '/32',
-                'Description': 'Auto generated from Lambda at ' + (new Date()).toUTCString()
+                CidrIp: ip + '/32',
+                Description: this.descriptionPrefix + (new Date()).toUTCString()
               }
             ]
           }
         ]
-      }).promise();
+      });
+      await this.ec2.send(command);
       message = 'addedIpToFirewall';
     } catch (e) {
-      if (e.code === 'InvalidPermission.Duplicate') {
+      if (e.Code === 'InvalidPermission.Duplicate') {
         message = 'noChangeDone';
       } else {
         throw e;
@@ -43,37 +41,50 @@ export class FirewallController {
     };
   }
 
-  async removeAllFirewallRules(securityGroupId: string) {
+  async removeAllTaggedFirewallRules(securityGroupId: string) {
     console.info('Start "removeAllFirewallRules" method for security group "' + securityGroupId + '"');
     let securityGroup: SecurityGroup = await this.getSecurityGroup(securityGroupId);
     let counter: number = 0;
     for (const ipPermission of securityGroup.IpPermissions) {
-      delete ipPermission.UserIdGroupPairs;
-      delete ipPermission.PrefixListIds;
-      delete ipPermission.Ipv6Ranges;
-
-      try {
-        await this.ec2.revokeSecurityGroupIngress({
-          GroupId: securityGroupId,
-          IpPermissions: [ipPermission]
-        }).promise();
-        counter++;
-      } catch (e) {
-        console.error(e);
+      for (const ipRange of ipPermission.IpRanges) {
+        if (ipRange.Description !== undefined && ipRange.Description.startsWith(this.descriptionPrefix)) {
+          const command = new RevokeSecurityGroupIngressCommand({
+            GroupId: securityGroupId,
+            IpPermissions: [
+              {
+                IpProtocol: ipPermission.IpProtocol,
+                FromPort: ipPermission.FromPort,
+                ToPort: ipPermission.ToPort,
+                IpRanges: [
+                  {
+                    CidrIp: ipRange.CidrIp,
+                  }
+                ]
+              }
+            ]
+          });
+          try {
+            await this.ec2.send(command);
+            counter++;
+          } catch (e) {
+            console.error(e);
+          }
+        }
       }
     }
 
     return {
-      message: 'Removed ' + counter + ' firewall rules'
+      message: 'Removed ' + counter + ' firewall rule(s)'
     };
   }
 
   async getSecurityGroup(securityGroupId: string): Promise<SecurityGroup> {
     console.info('Start "getSecurityGroup" method for security group "' + securityGroupId + '"');
-    let result: DescribeSecurityGroupsResult = await this.ec2.describeSecurityGroups({
+    const command = new DescribeSecurityGroupsCommand({
       'GroupIds': [securityGroupId]
-    }).promise();
-    return result.SecurityGroups[0];
+    });
+    const response: DescribeSecurityGroupsResult = await this.ec2.send(command);
+    return response.SecurityGroups[0];
   }
 
 }

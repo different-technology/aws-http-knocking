@@ -1,5 +1,5 @@
-import {handler as openFirewallHandler} from "./src/Handler/OpenFirewallHandler";
-import {handler as cleanupFirewallHandler} from "./src/Handler/CleanupFirewallHandler";
+import { handler as openFirewallHandler } from "./src/Handler/OpenFirewallHandler";
+import { handler as cleanupFirewallHandler } from "./src/Handler/CleanupFirewallHandler";
 
 /**
  * Main file for execute test on command line.

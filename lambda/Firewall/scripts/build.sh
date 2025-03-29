@@ -4,7 +4,7 @@
 # cd lambda/Firewall
 
 # Run TypeScript compiler
-tsc
+npx tsc
 
 # create build dir if not exists
 mkdir -p build

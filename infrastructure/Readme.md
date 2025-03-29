@@ -2,10 +2,11 @@
 
 ## Preparation
 1. Prepare access with
-```console
-export AWS_PROFILE=dt
-```
+   ```console
+   export AWS_PROFILE=dt
+   ```
 2. Deploy lambdas (for up-to-date "source_code_hash")
+
 ## Plan
 Show the available changes
 ```console

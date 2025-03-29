@@ -67,7 +67,7 @@ resource "aws_lambda_function" "api_open_firewall_lambda" {
   description   = "Open the firewall"
   role          = aws_iam_role.lambda_role.arn
   handler       = "src/Handler/OpenFirewallHandler.handler"
-  runtime       = "nodejs14.x"
+  runtime       = "nodejs22.x"
   timeout       = "15"
   environment {
     variables = {

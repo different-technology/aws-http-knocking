@@ -1,4 +1,4 @@
-import {FirewallController} from "../Controller/FirewallController";
+import { FirewallController } from "../Controller/FirewallController";
 
 /**
  * Handler to run cleanup with AWS Lambda
@@ -7,7 +7,7 @@ import {FirewallController} from "../Controller/FirewallController";
  * @param callback
  */
 export const handler =  async (event: any, context: any, callback: (arg0: any, arg1: any) => void): Promise<any> => {
-  let result = await (new FirewallController()).removeAllFirewallRules(process.env.securityGroupId);
+  let result = await (new FirewallController()).removeAllTaggedFirewallRules(process.env.securityGroupId);
 
   const response = {
     statusCode: 200,

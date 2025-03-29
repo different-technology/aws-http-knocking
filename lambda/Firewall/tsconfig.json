@@ -9,7 +9,6 @@
   },
   "include": [
     "src/**/*",
-    "src/Handler/OpenFirewallHandler.ts",
     "Main.ts"
   ]
 }

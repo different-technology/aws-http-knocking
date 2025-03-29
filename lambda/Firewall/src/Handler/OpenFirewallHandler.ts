@@ -1,4 +1,4 @@
-import {FirewallController} from "../Controller/FirewallController";
+import { FirewallController } from "../Controller/FirewallController";
 
 /**
  * Handler to run checks with AWS Lambda

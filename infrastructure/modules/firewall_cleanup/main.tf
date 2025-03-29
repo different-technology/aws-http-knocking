@@ -90,7 +90,7 @@ resource "aws_lambda_function" "cleanup_firewall_lambda" {
   description       = "Remove exceptions from the firewall"
   role              = aws_iam_role.lambda_role.arn
   handler           = "src/Handler/CleanupFirewallHandler.handler"
-  runtime           = "nodejs14.x"
+  runtime           = "nodejs22.x"
   timeout           = "15"
   environment {
     variables = {
